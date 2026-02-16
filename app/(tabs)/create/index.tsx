@@ -14,7 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Sparkles, Layers, BookOpen, Hash } from 'lucide-react-native';
 import { useMutation } from '@tanstack/react-query';
-import { generateObject } from '@rork-ai/toolkit-sdk';
+import { generateObject } from '@/lib/ai';
 import { z } from 'zod';
 import Colors from '@/constants/colors';
 import { useFlashcards } from '@/contexts/FlashcardContext';
