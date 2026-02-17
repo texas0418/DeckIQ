@@ -67,7 +67,7 @@ export default function CreateScreen() {
         throw new Error('Please enter 100 or fewer cards.');
       }
 
-      const prompt = `Generate exactly ${count} flashcards for studying "${topic}". ${description ? `Focus on: ${description}.` : ''} IMPORTANT: Generate actual practice questions and answers that would appear ON the test or exam, NOT questions about the test itself. For example, if the topic is "GED Math", generate real math problems and solutions. If the topic is "SAT Vocabulary", generate vocabulary words and their definitions. Each card should have a practice question or key term on the front and the correct answer or definition on the back. Make the cards progressively harder and suitable for effective test preparation.`;
+      const prompt = `Generate exactly ${count} practice flashcards for "${topic}". ${description ? `Cover these specific topics: ${description}.` : ''} CRITICAL RULES: 1) Every card must be an actual practice question that could realistically appear on this exam or in this subject. 2) NEVER generate questions about the test itself (like "what does ${topic} stand for" or "how many sections does the test have"). 3) Front of card = a specific practice question, problem, or key term. 4) Back of card = the correct answer, solution, or definition. 5) Make cards progressively harder from beginner to advanced. 6) Use the exact style and difficulty level of the real exam.`;
 
       console.log('[CreateScreen] Generating flashcards with prompt:', prompt);
 
