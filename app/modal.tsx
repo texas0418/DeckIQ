@@ -13,7 +13,7 @@ export default function ModalScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>FlashMind</Text>
+        <Text style={styles.title}>DeckIQ</Text>
         <Text style={styles.description}>
           AI-powered flashcards for smarter studying
         </Text>

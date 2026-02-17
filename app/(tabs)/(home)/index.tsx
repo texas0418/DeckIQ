@@ -31,10 +31,8 @@ export default function HomeScreen() {
           style={styles.heroBanner}
         >
           <View style={styles.heroContent}>
-            <View style={styles.heroTextContainer}>
-              <Text style={styles.heroTitle}>Study Smarter</Text>
-              <Text style={styles.heroSubtitle}>AI-powered flashcards for every subject and test</Text>
-            </View>
+            <Text style={styles.heroTitle}>Study Smarter</Text>
+            <Text style={styles.heroSubtitle}>AI-powered flashcards for every subject and test</Text>
             <Pressable
               style={styles.heroButton}
               onPress={() => router.push('/(tabs)/create' as any)}
@@ -119,37 +117,32 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   heroContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 20,
   },
-  heroTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '700' as const,
     color: '#FFFFFF',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   heroSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: 'rgba(255,255,255,0.7)',
-    lineHeight: 20,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   heroButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     backgroundColor: Colors.amber,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 12,
-    gap: 6,
+    gap: 8,
   },
   heroButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700' as const,
     color: Colors.primary,
   },

@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import createContextHook from '@nkzw/create-context-hook';
 import { Deck, Flashcard, StudyResult } from '@/types/flashcard';
 
-const DECKS_KEY = 'flashmind_decks';
-const RESULTS_KEY = 'flashmind_results';
+const DECKS_KEY = 'deckiq_decks';
+const RESULTS_KEY = 'deckiq_results';
 
 export const [FlashcardProvider, useFlashcards] = createContextHook(() => {
   const queryClient = useQueryClient();

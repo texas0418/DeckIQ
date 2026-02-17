@@ -30,7 +30,7 @@ export default function ProfileScreen() {
         <View style={styles.avatarContainer}>
           <Brain size={32} color="#FFFFFF" />
         </View>
-        <Text style={styles.headerTitle}>FlashMind</Text>
+        <Text style={styles.headerTitle}>DeckIQ</Text>
         <Text style={styles.headerSubtitle}>Your Learning Journey</Text>
       </LinearGradient>
 
