@@ -10,7 +10,7 @@ export default function HomeLayout() {
         headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'DeckIQ', headerLargeTitle: true }} />
+      <Stack.Screen name="index" options={{ title: 'DeckIQ' }} />
       <Stack.Screen name="category" options={{ title: 'Category' }} />
     </Stack>
   );
