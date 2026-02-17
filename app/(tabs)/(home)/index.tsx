@@ -1,18 +1,69 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Animated } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Sparkles, TrendingUp, Zap } from 'lucide-react-native';
+import { Sparkles, TrendingUp, Zap, ChevronDown, ChevronRight, Blocks, BookOpen, GraduationCap, FileCheck, Award } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { categories, quickStudyTopics } from '@/mocks/categories';
 import CategoryCard from '@/components/CategoryCard';
 import { useFlashcards } from '@/contexts/FlashcardContext';
 
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const sections = [
+  {
+    title: 'Elementary School',
+    subtitle: 'Grades K-5',
+    icon: 'Blocks',
+    color: '#10B981',
+    categoryIds: ['kindergarten', 'grade1', 'grade2', 'grade3', 'grade4', 'grade5'],
+  },
+  {
+    title: 'Middle School',
+    subtitle: 'Grades 6-8',
+    icon: 'BookOpen',
+    color: '#3B82F6',
+    categoryIds: ['grade6', 'grade7', 'grade8'],
+  },
+  {
+    title: 'High School',
+    subtitle: 'Grades 9-12',
+    icon: 'GraduationCap',
+    color: '#8B5CF6',
+    categoryIds: ['grade9', 'grade10', 'grade11', 'grade12'],
+  },
+  {
+    title: 'Standardized Tests',
+    subtitle: 'SAT, ACT, GED & more',
+    icon: 'FileCheck',
+    color: '#F59E0B',
+    categoryIds: ['sat', 'act', 'ged', 'clt', 'ap-exams', 'psat'],
+  },
+  {
+    title: 'Graduate & Professional',
+    subtitle: 'MCAT, LSAT, GRE & more',
+    icon: 'Award',
+    color: '#EF6461',
+    categoryIds: ['mcat', 'lsat', 'gre', 'gmat', 'dat', 'nclex', 'bar', 'cpa'],
+  },
+];
+
+const iconMap: Record<string, any> = {
+  Blocks,
+  BookOpen,
+  GraduationCap,
+  FileCheck,
+  Award,
+};
+
 export default function HomeScreen() {
   const router = useRouter();
   const { totalDecks, totalSessions, totalCardsStudied } = useFlashcards();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -20,6 +71,11 @@ export default function HomeScreen() {
       Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
     ]).start();
   }, []);
+
+  const toggleSection = (title: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedSection(expandedSection === title ? null : title);
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
@@ -88,13 +144,50 @@ export default function HomeScreen() {
           <TrendingUp size={18} color={Colors.accent} />
           <Text style={styles.sectionTitle}>Browse by Level</Text>
         </View>
-        {categories.map((category) => (
-          <CategoryCard
-            key={category.id}
-            category={category}
-            onPress={() => router.push({ pathname: '/(tabs)/(home)/category' as any, params: { categoryId: category.id } })}
-          />
-        ))}
+
+        {sections.map((sec) => {
+          const isExpanded = expandedSection === sec.title;
+          const Icon = iconMap[sec.icon] || BookOpen;
+          const sectionCategories = sec.categoryIds
+            .map((id) => categories.find((c) => c.id === id))
+            .filter(Boolean);
+
+          return (
+            <View key={sec.title} style={styles.accordionContainer}>
+              <Pressable
+                style={[styles.accordionHeader, { borderLeftColor: sec.color }]}
+                onPress={() => toggleSection(sec.title)}
+              >
+                <View style={[styles.accordionIcon, { backgroundColor: sec.color + '18' }]}>
+                  <Icon size={20} color={sec.color} />
+                </View>
+                <View style={styles.accordionTextContainer}>
+                  <Text style={styles.accordionTitle}>{sec.title}</Text>
+                  <Text style={styles.accordionSubtitle}>{sec.subtitle} · {sectionCategories.length} categories</Text>
+                </View>
+                {isExpanded ? (
+                  <ChevronDown size={20} color={Colors.textTertiary} />
+                ) : (
+                  <ChevronRight size={20} color={Colors.textTertiary} />
+                )}
+              </Pressable>
+
+              {isExpanded && (
+                <View style={styles.accordionBody}>
+                  {sectionCategories.map((category) => (
+                    category && (
+                      <CategoryCard
+                        key={category.id}
+                        category={category}
+                        onPress={() => router.push({ pathname: '/(tabs)/(home)/category' as any, params: { categoryId: category.id } })}
+                      />
+                    )
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        })}
       </View>
 
       <View style={styles.bottomPadding} />
@@ -201,6 +294,49 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600' as const,
     color: Colors.text,
+  },
+  // Accordion
+  accordionContainer: {
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  accordionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 14,
+    borderLeftWidth: 4,
+    shadowColor: Colors.cardShadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  accordionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  accordionTextContainer: {
+    flex: 1,
+  },
+  accordionTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: Colors.text,
+  },
+  accordionSubtitle: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  accordionBody: {
+    marginTop: 8,
+    paddingLeft: 4,
   },
   bottomPadding: {
     height: 20,

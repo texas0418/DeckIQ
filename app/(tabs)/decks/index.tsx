@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Plus, Inbox } from 'lucide-react-native';
 import Colors from '@/constants/colors';
@@ -7,8 +7,23 @@ import { useFlashcards } from '@/contexts/FlashcardContext';
 import DeckCard from '@/components/DeckCard';
 
 export default function DecksScreen() {
-  const { decks, isLoading } = useFlashcards();
+  const { decks, deleteDeck, isLoading } = useFlashcards();
   const router = useRouter();
+
+  const handleDelete = (deckId: string, title: string) => {
+    Alert.alert(
+      'Delete Deck',
+      `Are you sure you want to delete "${title}"? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteDeck(deckId),
+        },
+      ]
+    );
+  };
 
   if (isLoading) {
     return (
@@ -46,6 +61,7 @@ export default function DecksScreen() {
               key={deck.id}
               deck={deck}
               onPress={() => router.push({ pathname: '/deck/[deckId]' as any, params: { deckId: deck.id } })}
+              onDelete={() => handleDelete(deck.id, deck.title)}
             />
           ))}
           <View style={styles.bottomPadding} />

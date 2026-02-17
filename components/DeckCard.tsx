@@ -1,12 +1,13 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
-import { Layers, Clock } from 'lucide-react-native';
+import { Layers, Clock, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Deck } from '@/types/flashcard';
 
 interface DeckCardProps {
   deck: Deck;
   onPress: () => void;
+  onDelete?: () => void;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -22,7 +23,7 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString();
 }
 
-export default React.memo(function DeckCard({ deck, onPress }: DeckCardProps) {
+export default React.memo(function DeckCard({ deck, onPress, onDelete }: DeckCardProps) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const mastered = deck.cards.filter((c) => c.mastered).length;
   const progress = deck.cards.length > 0 ? mastered / deck.cards.length : 0;
@@ -48,9 +49,24 @@ export default React.memo(function DeckCard({ deck, onPress }: DeckCardProps) {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title} numberOfLines={1}>{deck.title}</Text>
-            <View style={styles.cardCount}>
-              <Layers size={14} color={Colors.textSecondary} />
-              <Text style={styles.countText}>{deck.cards.length}</Text>
+            <View style={styles.headerRight}>
+              <View style={styles.cardCount}>
+                <Layers size={14} color={Colors.textSecondary} />
+                <Text style={styles.countText}>{deck.cards.length}</Text>
+              </View>
+              {onDelete && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  hitSlop={8}
+                  style={styles.deleteButton}
+                  testID={`deck-delete-${deck.id}`}
+                >
+                  <Trash2 size={16} color={Colors.coral} />
+                </Pressable>
+              )}
             </View>
           </View>
           <Text style={styles.description} numberOfLines={1}>{deck.description}</Text>
@@ -107,6 +123,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   cardCount: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,6 +137,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textSecondary,
     fontWeight: '500' as const,
+  },
+  deleteButton: {
+    padding: 4,
   },
   description: {
     fontSize: 13,
