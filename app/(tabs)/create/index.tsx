@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Sparkles, Layers, BookOpen, Hash } from 'lucide-react-native';
+import { Sparkles, Layers, BookOpen, Hash, Plus, Trash2, PenLine } from 'lucide-react-native';
 import { useMutation } from '@tanstack/react-query';
 import { generateObject } from '@/lib/ai';
 import { z } from 'zod';
@@ -31,24 +31,43 @@ const flashcardSchema = z.object({
   ),
 });
 
+type ManualCard = { id: string; front: string; back: string };
+
 export default function CreateScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ topic?: string; category?: string; subcategory?: string; description?: string }>();
   const { addDeck } = useFlashcards();
 
+  const [mode, setMode] = useState<'ai' | 'manual'>('ai');
   const [topic, setTopic] = useState(params.topic ?? '');
   const [description, setDescription] = useState(params.description ?? '');
   const [numCards, setNumCards] = useState('10');
   const [selectedColor, setSelectedColor] = useState(cardColors[0]);
+
+  // Manual mode state
+  const [manualTitle, setManualTitle] = useState('');
+  const [manualDescription, setManualDescription] = useState('');
+  const [manualCards, setManualCards] = useState<ManualCard[]>([
+    { id: '1', front: '', back: '' },
+  ]);
 
   useEffect(() => {
     if (params.topic) setTopic(params.topic);
     if (params.description) setDescription(params.description);
   }, [params.topic, params.description]);
 
+  // --- AI Generation ---
   const generateMutation = useMutation({
     mutationFn: async () => {
-      const prompt = `Generate ${numCards} flashcards for studying "${topic}". ${description ? `Focus on: ${description}.` : ''} Each card should have a clear question/term on the front and a concise, accurate answer/definition on the back. Make the cards educational, progressive in difficulty, and suitable for effective studying.`;
+      const count = parseInt(numCards, 10);
+      if (isNaN(count) || count < 1) {
+        throw new Error('Please enter a valid number of cards.');
+      }
+      if (count > 100) {
+        throw new Error('Please enter 100 or fewer cards.');
+      }
+
+      const prompt = `Generate exactly ${count} flashcards for studying "${topic}". ${description ? `Focus on: ${description}.` : ''} IMPORTANT: Generate actual practice questions and answers that would appear ON the test or exam, NOT questions about the test itself. For example, if the topic is "GED Math", generate real math problems and solutions. If the topic is "SAT Vocabulary", generate vocabulary words and their definitions. Each card should have a practice question or key term on the front and the correct answer or definition on the back. Make the cards progressively harder and suitable for effective test preparation.`;
 
       console.log('[CreateScreen] Generating flashcards with prompt:', prompt);
 
@@ -80,16 +99,73 @@ export default function CreateScreen() {
       };
 
       addDeck(newDeck);
-      console.log('[CreateScreen] Deck created:', newDeck.id);
       router.push({ pathname: '/deck/[deckId]' as any, params: { deckId: newDeck.id } });
     },
     onError: (error) => {
       console.error('[CreateScreen] Generation error:', error);
-      Alert.alert('Generation Failed', 'Could not generate flashcards. Please try again.');
+      Alert.alert('Generation Failed', error.message || 'Could not generate flashcards. Please try again.');
     },
   });
 
-  const canGenerate = topic.trim().length > 0 && !generateMutation.isPending;
+  const canGenerate = topic.trim().length > 0 && !generateMutation.isPending && numCards.trim().length > 0;
+
+  // --- Manual Creation ---
+  const addManualCard = () => {
+    setManualCards((prev) => [
+      ...prev,
+      { id: Date.now().toString(), front: '', back: '' },
+    ]);
+  };
+
+  const updateManualCard = (id: string, field: 'front' | 'back', value: string) => {
+    setManualCards((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
+  };
+
+  const removeManualCard = (id: string) => {
+    if (manualCards.length <= 1) {
+      Alert.alert('Cannot Remove', 'You need at least one card.');
+      return;
+    }
+    setManualCards((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const saveManualDeck = () => {
+    if (!manualTitle.trim()) {
+      Alert.alert('Missing Title', 'Please enter a deck title.');
+      return;
+    }
+
+    const validCards = manualCards.filter((c) => c.front.trim() && c.back.trim());
+    if (validCards.length === 0) {
+      Alert.alert('No Cards', 'Please fill in at least one card with both front and back.');
+      return;
+    }
+
+    const newDeck: Deck = {
+      id: Date.now().toString(),
+      title: manualTitle.trim(),
+      description: manualDescription.trim() || `Custom flashcard deck`,
+      category: 'custom',
+      subcategory: 'custom',
+      cards: validCards.map((card, i) => ({
+        id: `${Date.now()}-${i}`,
+        front: card.front.trim(),
+        back: card.back.trim(),
+        mastered: false,
+      })),
+      createdAt: new Date().toISOString(),
+      lastStudied: null,
+      totalStudySessions: 0,
+      color: selectedColor,
+    };
+
+    addDeck(newDeck);
+    router.push({ pathname: '/deck/[deckId]' as any, params: { deckId: newDeck.id } });
+  };
+
+  const filledManualCards = manualCards.filter((c) => c.front.trim() && c.back.trim()).length;
 
   return (
     <KeyboardAvoidingView
@@ -97,102 +173,227 @@ export default function CreateScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerSection}>
-          <View style={styles.aiIconContainer}>
-            <Sparkles size={28} color={Colors.amber} />
-          </View>
-          <Text style={styles.headerTitle}>AI Flashcard Generator</Text>
-          <Text style={styles.headerSubtitle}>Enter a topic and let AI create study-ready flashcards instantly</Text>
+        {/* Mode Toggle */}
+        <View style={styles.modeToggleContainer}>
+          <Pressable
+            style={[styles.modeToggle, mode === 'ai' && styles.modeToggleActive]}
+            onPress={() => setMode('ai')}
+          >
+            <Sparkles size={16} color={mode === 'ai' ? '#FFFFFF' : Colors.textSecondary} />
+            <Text style={[styles.modeToggleText, mode === 'ai' && styles.modeToggleTextActive]}>AI Generate</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.modeToggle, mode === 'manual' && styles.modeToggleActive]}
+            onPress={() => setMode('manual')}
+          >
+            <PenLine size={16} color={mode === 'manual' ? '#FFFFFF' : Colors.textSecondary} />
+            <Text style={[styles.modeToggleText, mode === 'manual' && styles.modeToggleTextActive]}>Manual</Text>
+          </Pressable>
         </View>
 
-        <View style={styles.formSection}>
-          <View style={styles.inputGroup}>
-            <View style={styles.inputLabel}>
-              <BookOpen size={16} color={Colors.textSecondary} />
-              <Text style={styles.labelText}>Topic</Text>
+        {mode === 'ai' ? (
+          /* ======================== AI MODE ======================== */
+          <>
+            <View style={styles.headerSection}>
+              <View style={styles.aiIconContainer}>
+                <Sparkles size={28} color={Colors.amber} />
+              </View>
+              <Text style={styles.headerTitle}>AI Flashcard Generator</Text>
+              <Text style={styles.headerSubtitle}>Enter a topic and let AI create study-ready flashcards instantly</Text>
             </View>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., SAT Vocabulary, Cell Biology, US History..."
-              placeholderTextColor={Colors.textTertiary}
-              value={topic}
-              onChangeText={setTopic}
-              testID="topic-input"
-            />
-          </View>
 
-          <View style={styles.inputGroup}>
-            <View style={styles.inputLabel}>
-              <Layers size={16} color={Colors.textSecondary} />
-              <Text style={styles.labelText}>Description (optional)</Text>
-            </View>
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Add specific details, chapters, or focus areas..."
-              placeholderTextColor={Colors.textTertiary}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-              testID="description-input"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <View style={styles.inputLabel}>
-              <Hash size={16} color={Colors.textSecondary} />
-              <Text style={styles.labelText}>Number of Cards</Text>
-            </View>
-            <View style={styles.numCardsContainer}>
-              {['5', '10', '15', '20'].map((num) => (
-                <Pressable
-                  key={num}
-                  style={[styles.numChip, numCards === num && styles.numChipActive]}
-                  onPress={() => setNumCards(num)}
-                  testID={`num-cards-${num}`}
-                >
-                  <Text style={[styles.numChipText, numCards === num && styles.numChipTextActive]}>{num}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.labelText}>Deck Color</Text>
-            <View style={styles.colorsContainer}>
-              {cardColors.map((color) => (
-                <Pressable
-                  key={color}
-                  style={[styles.colorChip, { backgroundColor: color }, selectedColor === color && styles.colorChipActive]}
-                  onPress={() => setSelectedColor(color)}
-                  testID={`color-${color}`}
+            <View style={styles.formSection}>
+              <View style={styles.inputGroup}>
+                <View style={styles.inputLabel}>
+                  <BookOpen size={16} color={Colors.textSecondary} />
+                  <Text style={styles.labelText}>Topic</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., SAT Vocabulary, Cell Biology, US History..."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={topic}
+                  onChangeText={setTopic}
                 />
-              ))}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <View style={styles.inputLabel}>
+                  <Layers size={16} color={Colors.textSecondary} />
+                  <Text style={styles.labelText}>Description (optional)</Text>
+                </View>
+                <TextInput
+                  style={[styles.input, styles.multilineInput]}
+                  placeholder="Add specific details, chapters, or focus areas..."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <View style={styles.inputLabel}>
+                  <Hash size={16} color={Colors.textSecondary} />
+                  <Text style={styles.labelText}>Number of Cards</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter number of cards (e.g., 10, 25, 50)"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={numCards}
+                  onChangeText={(text) => setNumCards(text.replace(/[^0-9]/g, ''))}
+                  keyboardType="number-pad"
+                  maxLength={3}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelText}>Deck Color</Text>
+                <View style={styles.colorsContainer}>
+                  {cardColors.map((color) => (
+                    <Pressable
+                      key={color}
+                      style={[styles.colorChip, { backgroundColor: color }, selectedColor === color && styles.colorChipActive]}
+                      onPress={() => setSelectedColor(color)}
+                    />
+                  ))}
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
 
-        <Pressable
-          style={[styles.generateButton, !canGenerate && styles.generateButtonDisabled]}
-          onPress={() => generateMutation.mutate()}
-          disabled={!canGenerate}
-          testID="generate-btn"
-        >
-          {generateMutation.isPending ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Sparkles size={20} color="#FFFFFF" />
-          )}
-          <Text style={styles.generateButtonText}>
-            {generateMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
-          </Text>
-        </Pressable>
+            <Pressable
+              style={[styles.generateButton, !canGenerate && styles.buttonDisabled]}
+              onPress={() => generateMutation.mutate()}
+              disabled={!canGenerate}
+            >
+              {generateMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Sparkles size={20} color="#FFFFFF" />
+              )}
+              <Text style={styles.generateButtonText}>
+                {generateMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
+              </Text>
+            </Pressable>
 
-        {generateMutation.isPending && (
-          <View style={styles.loadingHint}>
-            <Text style={styles.loadingHintText}>AI is creating your flashcards. This may take a moment...</Text>
-          </View>
+            {generateMutation.isPending && (
+              <View style={styles.loadingHint}>
+                <Text style={styles.loadingHintText}>AI is creating your flashcards. This may take a moment...</Text>
+              </View>
+            )}
+          </>
+        ) : (
+          /* ======================== MANUAL MODE ======================== */
+          <>
+            <View style={styles.headerSection}>
+              <View style={[styles.aiIconContainer, { backgroundColor: Colors.accentLight }]}>
+                <PenLine size={28} color={Colors.accent} />
+              </View>
+              <Text style={styles.headerTitle}>Create Your Own</Text>
+              <Text style={styles.headerSubtitle}>Build a custom deck with your own questions and answers</Text>
+            </View>
+
+            <View style={styles.formSection}>
+              <View style={styles.inputGroup}>
+                <View style={styles.inputLabel}>
+                  <BookOpen size={16} color={Colors.textSecondary} />
+                  <Text style={styles.labelText}>Deck Title</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Chapter 5 Review, Spanish Verbs..."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={manualTitle}
+                  onChangeText={setManualTitle}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <View style={styles.inputLabel}>
+                  <Layers size={16} color={Colors.textSecondary} />
+                  <Text style={styles.labelText}>Description (optional)</Text>
+                </View>
+                <TextInput
+                  style={[styles.input, styles.multilineInput]}
+                  placeholder="What is this deck about?"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={manualDescription}
+                  onChangeText={setManualDescription}
+                  multiline
+                  numberOfLines={2}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelText}>Deck Color</Text>
+                <View style={styles.colorsContainer}>
+                  {cardColors.map((color) => (
+                    <Pressable
+                      key={color}
+                      style={[styles.colorChip, { backgroundColor: color }, selectedColor === color && styles.colorChipActive]}
+                      onPress={() => setSelectedColor(color)}
+                    />
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            {/* Cards */}
+            <View style={styles.cardsHeader}>
+              <Text style={styles.cardsHeaderTitle}>Cards ({filledManualCards}/{manualCards.length})</Text>
+            </View>
+
+            {manualCards.map((card, index) => (
+              <View key={card.id} style={styles.manualCard}>
+                <View style={styles.manualCardHeader}>
+                  <Text style={styles.manualCardNumber}>Card {index + 1}</Text>
+                  {manualCards.length > 1 && (
+                    <Pressable onPress={() => removeManualCard(card.id)} hitSlop={8}>
+                      <Trash2 size={16} color={Colors.coral} />
+                    </Pressable>
+                  )}
+                </View>
+                <TextInput
+                  style={styles.manualCardInput}
+                  placeholder="Front — question or term"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={card.front}
+                  onChangeText={(v) => updateManualCard(card.id, 'front', v)}
+                  multiline
+                />
+                <View style={styles.manualCardDivider} />
+                <TextInput
+                  style={styles.manualCardInput}
+                  placeholder="Back — answer or definition"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={card.back}
+                  onChangeText={(v) => updateManualCard(card.id, 'back', v)}
+                  multiline
+                />
+              </View>
+            ))}
+
+            <Pressable style={styles.addCardButton} onPress={addManualCard}>
+              <Plus size={18} color={Colors.accent} />
+              <Text style={styles.addCardButtonText}>Add Card</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.generateButton, { backgroundColor: Colors.accent }, (!manualTitle.trim() || filledManualCards === 0) && styles.buttonDisabled]}
+              onPress={saveManualDeck}
+              disabled={!manualTitle.trim() || filledManualCards === 0}
+            >
+              <Layers size={20} color="#FFFFFF" />
+              <Text style={styles.generateButtonText}>
+                Save Deck ({filledManualCards} card{filledManualCards !== 1 ? 's' : ''})
+              </Text>
+            </Pressable>
+          </>
         )}
+
+        <View style={styles.bottomPadding} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -206,6 +407,37 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
   },
+  // Mode Toggle
+  modeToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modeToggle: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 11,
+    gap: 6,
+  },
+  modeToggleActive: {
+    backgroundColor: Colors.primary,
+  },
+  modeToggleText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.textSecondary,
+  },
+  modeToggleTextActive: {
+    color: '#FFFFFF',
+  },
+  // Header
   headerSection: {
     alignItems: 'center',
     marginBottom: 28,
@@ -231,6 +463,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
+  // Form
   formSection: {
     gap: 20,
     marginBottom: 28,
@@ -258,33 +491,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   multilineInput: {
-    minHeight: 80,
+    minHeight: 70,
     textAlignVertical: 'top',
-  },
-  numCardsContainer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  numChip: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  numChipActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  numChipText: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  numChipTextActive: {
-    color: '#FFFFFF',
   },
   colorsContainer: {
     flexDirection: 'row',
@@ -300,16 +508,17 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.text,
   },
+  // Buttons
   generateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: 16,
     gap: 10,
   },
-  generateButtonDisabled: {
+  buttonDisabled: {
     opacity: 0.5,
   },
   generateButtonText: {
@@ -325,5 +534,64 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textTertiary,
     textAlign: 'center',
+  },
+  // Manual Cards
+  cardsHeader: {
+    marginBottom: 14,
+  },
+  cardsHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: Colors.text,
+  },
+  manualCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  manualCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  manualCardNumber: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: Colors.textTertiary,
+  },
+  manualCardInput: {
+    fontSize: 15,
+    color: Colors.text,
+    minHeight: 40,
+    paddingVertical: 6,
+  },
+  manualCardDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: 6,
+  },
+  addCardButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.accent,
+    borderStyle: 'dashed',
+    gap: 8,
+    marginBottom: 20,
+  },
+  addCardButtonText: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.accent,
+  },
+  bottomPadding: {
+    height: 40,
   },
 });
