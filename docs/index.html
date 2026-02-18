@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeckIQ — Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #1A2B4A;
+      --navy-mid: #2D4A7A;
+      --amber: #F5A623;
+      --amber-light: #FFF8EC;
+      --green: #10B981;
+      --blue: #3B82F6;
+      --purple: #8B5CF6;
+      --coral: #EF6461;
+      --bg: #FAFAF8;
+      --surface: #FFFFFF;
+      --text: #1A1A2E;
+      --text-secondary: #6B7280;
+      --border: #E5E7EB;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(26, 43, 74, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--amber);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .nav-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--amber); }
+
+    /* HERO */
+    .hero {
+      padding: 140px 24px 80px;
+      text-align: center;
+      background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(36px, 6vw, 52px);
+      color: #fff;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .hero h1 span { color: var(--amber); }
+
+    .hero p {
+      color: rgba(255,255,255,0.65);
+      font-size: 17px;
+      max-width: 480px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* SECTIONS */
+    .section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      color: var(--navy);
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    .section p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* SUPPORT CARDS */
+    .support-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .support-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .support-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    .support-card .icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .support-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .support-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    .support-card a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .support-card a:hover { text-decoration: underline; }
+
+    /* FAQ */
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    .faq-item:last-child { border-bottom: none; }
+
+    .faq-q {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      cursor: default;
+    }
+
+    .faq-a {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* PRIVACY */
+    .privacy-section { padding-top: 60px; }
+
+    .privacy-section h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 32px 0 12px;
+    }
+
+    .privacy-section p,
+    .privacy-section li {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .privacy-section ul {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    .privacy-section li { margin-bottom: 6px; }
+
+    .effective-date {
+      display: inline-block;
+      background: var(--amber-light);
+      color: var(--navy);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--navy);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    footer p {
+      color: rgba(255,255,255,0.45);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--amber); }
+
+    @media (max-width: 600px) {
+      .support-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 16px; }
+      .nav-links a { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">
+        <div class="nav-logo">🧠</div>
+        <div class="nav-title">DeckIQ</div>
+      </a>
+      <div class="nav-links">
+        <a href="#support">Support</a>
+        <a href="#faq">FAQ</a>
+        <a href="#privacy">Privacy</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>How can we <span>help</span>?</h1>
+      <p>Get answers to common questions, reach our support team, or review our privacy policy.</p>
+      <div class="badge-row">
+        <div class="badge"><span class="dot" style="background:var(--green)"></span> All Systems Operational</div>
+        <div class="badge"><span class="dot" style="background:var(--amber)"></span> v1.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="section" id="support">
+    <div class="section-label">Support</div>
+    <h2>Get in Touch</h2>
+    <p>Having trouble with DeckIQ? We're here to help. Reach out through any of the channels below and we'll get back to you as soon as possible.</p>
+
+    <div class="support-grid">
+      <div class="support-card">
+        <div class="icon-wrap" style="background:#DBEAFE;">📧</div>
+        <h3>Email Support</h3>
+        <p>Send us a detailed message and we'll respond within 24 hours.</p>
+        <br>
+        <a href="mailto:simonshih@hotmail.com">simonshih@hotmail.com</a>
+      </div>
+      <div class="support-card">
+        <div class="icon-wrap" style="background:#FEF3C7;">🐛</div>
+        <h3>Report a Bug</h3>
+        <p>Found something broken? Let us know so we can fix it quickly.</p>
+        <br>
+        <a href="mailto:simonshih@hotmail.com?subject=DeckIQ%20Bug%20Report">Submit Bug Report</a>
+      </div>
+      <div class="support-card">
+        <div class="icon-wrap" style="background:#F3E8FF;">💡</div>
+        <h3>Feature Request</h3>
+        <p>Have an idea to make DeckIQ better? We'd love to hear it.</p>
+        <br>
+        <a href="mailto:simonshih@hotmail.com?subject=DeckIQ%20Feature%20Request">Suggest a Feature</a>
+      </div>
+      <div class="support-card">
+        <div class="icon-wrap" style="background:#D1FAE5;">⭐</div>
+        <h3>Rate DeckIQ</h3>
+        <p>Enjoying the app? A review on the App Store helps us a lot!</p>
+        <br>
+        <a href="#">Leave a Review</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FAQ -->
+  <div class="section" id="faq">
+    <div class="section-label">FAQ</div>
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">How does AI flashcard generation work?</div>
+      <div class="faq-a">DeckIQ uses OpenAI's API to generate flashcards from your chosen topic. Just enter a subject, select how many cards you want, and the AI creates real practice questions matched to the difficulty level of your test or grade. You can also paste your notes or upload a photo of your study materials.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is my data stored on your servers?</div>
+      <div class="faq-a">No. All your decks, study progress, and results are stored locally on your device using on-device storage. We do not have a server that stores your personal data. The only time data leaves your device is when you generate flashcards — the topic or text you enter is sent to OpenAI's API for processing, and the generated cards are returned to your device.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What tests and grade levels are covered?</div>
+      <div class="faq-a">DeckIQ covers Elementary (K-5), Middle School (6-8), High School (9-12), standardized tests (SAT, ACT, GED, CLT, AP, PSAT), and graduate/professional exams (MCAT, LSAT, GRE, GMAT, DAT, NCLEX, Bar Exam, CPA). Each includes subject-specific breakdowns.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I create flashcards without AI?</div>
+      <div class="faq-a">Yes! DeckIQ has a Manual mode where you can create your own cards one by one. You can also paste text from your notes and let the AI extract key concepts, or take a photo of your study materials.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is DeckIQ free?</div>
+      <div class="faq-a">Yes, DeckIQ is free to download and use.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">The app isn't generating cards. What's wrong?</div>
+      <div class="faq-a">Make sure you have an active internet connection — AI generation requires connecting to the API. If the issue persists, try restarting the app. If you're still having trouble, please email us with details about what you were trying to generate.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I use DeckIQ offline?</div>
+      <div class="faq-a">You can study all your existing decks offline. However, generating new flashcards with AI requires an internet connection since the AI processing happens in the cloud.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PRIVACY POLICY -->
+  <div class="section privacy-section" id="privacy">
+    <div class="section-label">Legal</div>
+    <h2>Privacy Policy</h2>
+    <div class="effective-date">Effective: February 18, 2026</div>
+
+    <p>DeckIQ ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the DeckIQ mobile application.</p>
+
+    <h3>Information We Collect</h3>
+    <p><strong>Information you provide:</strong> When you use DeckIQ, you may enter topics, paste notes, or upload photos of study materials to generate flashcards. This content is processed by OpenAI's API to create your flashcards.</p>
+    <p><strong>Locally stored data:</strong> Your flashcard decks, study progress, mastery tracking, and study session history are stored locally on your device. This data never leaves your device and is not transmitted to us or any third party.</p>
+    <p><strong>We do not collect:</strong></p>
+    <ul>
+      <li>Personal identification information (name, email, phone number)</li>
+      <li>Location data</li>
+      <li>Device identifiers or advertising IDs</li>
+      <li>Usage analytics or tracking data</li>
+      <li>Financial or payment information</li>
+    </ul>
+
+    <h3>How We Use Your Information</h3>
+    <p>The only time data leaves your device is when you use AI-powered features:</p>
+    <ul>
+      <li><strong>AI Flashcard Generation:</strong> When you generate cards from a topic, the topic text and description are sent to OpenAI's API.</li>
+      <li><strong>Paste Notes:</strong> When you paste text, that text is sent to OpenAI's API for processing.</li>
+      <li><strong>Photo Upload:</strong> When you upload or photograph study materials, the image data is sent to OpenAI's API for text recognition and card generation.</li>
+    </ul>
+    <p>This data is sent solely for the purpose of generating flashcards and is subject to <a href="https://openai.com/policies/privacy-policy" style="color:var(--blue)">OpenAI's Privacy Policy</a> and <a href="https://openai.com/policies/terms-of-use" style="color:var(--blue)">Terms of Use</a>.</p>
+
+    <h3>Data Storage & Security</h3>
+    <p>All study data (decks, cards, progress, sessions) is stored locally on your device using standard iOS storage. We do not operate servers that store your data. If you delete the app, all locally stored data will be permanently removed.</p>
+
+    <h3>Third-Party Services</h3>
+    <p>DeckIQ uses the following third-party service:</p>
+    <ul>
+      <li><strong>OpenAI API:</strong> Used to process text and images for AI-powered flashcard generation. Data sent to OpenAI is governed by their privacy policy.</li>
+    </ul>
+    <p>We do not use any analytics services, advertising networks, or other third-party trackers.</p>
+
+    <h3>Children's Privacy</h3>
+    <p>DeckIQ is designed to be used by students of all ages, including children under 13. We do not knowingly collect personal information from children. Since all data is stored locally and we do not require account creation, there is no mechanism for us to collect or store personal data from any user, including children.</p>
+
+    <h3>No Account Required</h3>
+    <p>DeckIQ does not require you to create an account, sign in, or provide any personal information to use the app.</p>
+
+    <h3>Changes to This Policy</h3>
+    <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated effective date. We encourage you to review this page periodically.</p>
+
+    <h3>Contact Us</h3>
+    <p>If you have any questions about this Privacy Policy or DeckIQ's data practices, please contact us at:</p>
+    <p><strong>Email:</strong> <a href="mailto:simonshih@hotmail.com" style="color:var(--blue)">simonshih@hotmail.com</a></p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Simon Shih. All rights reserved.</p>
+    <p style="margin-top:8px;">
+      <a href="#support">Support</a> &nbsp;·&nbsp; <a href="#privacy">Privacy</a> &nbsp;·&nbsp; <a href="mailto:simonshih@hotmail.com">Contact</a>
+    </p>
+  </footer>
+
+</body>
+</html>
