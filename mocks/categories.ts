@@ -370,12 +370,12 @@ export const categories: Category[] = [
 ];
 
 export const quickStudyTopics = [
-  { id: 'vocab-sat', label: 'SAT Vocabulary', category: 'sat', subcategory: 'sat-vocab' },
-  { id: 'bio-cells', label: 'Cell Biology', category: 'grade9', subcategory: 'g9-biology' },
-  { id: 'us-history', label: 'US History', category: 'grade8', subcategory: 'g8-history' },
-  { id: 'algebra', label: 'Algebra Basics', category: 'grade6', subcategory: 'g6-math' },
-  { id: 'mcat-bio', label: 'MCAT Biology', category: 'mcat', subcategory: 'mcat-bio' },
-  { id: 'lsat-logic', label: 'LSAT Logic', category: 'lsat', subcategory: 'lsat-lr' },
-  { id: 'nclex-pharm', label: 'NCLEX Pharm', category: 'nclex', subcategory: 'nclex-pharm' },
-  { id: 'bar-torts', label: 'Bar Exam Torts', category: 'bar', subcategory: 'bar-torts' },
+  { id: 'vocab-sat', label: 'SAT Vocabulary', category: 'sat', subcategory: 'sat-vocab', description: 'High-frequency SAT vocabulary words, definitions, and usage in context' },
+  { id: 'bio-cells', label: 'Cell Biology', category: 'grade9', subcategory: 'g9-biology', description: 'Cell biology, DNA and genetics, evolution, ecology, classification, and human body systems' },
+  { id: 'us-history', label: 'US History', category: 'grade8', subcategory: 'g8-history', description: 'Constitution and Bill of Rights, early republic, westward expansion, Civil War, and Reconstruction' },
+  { id: 'algebra', label: 'Algebra Basics', category: 'grade6', subcategory: 'g6-math', description: 'Ratios and rates, dividing fractions, integers, expressions and equations, area and volume' },
+  { id: 'mcat-bio', label: 'MCAT Biology', category: 'mcat', subcategory: 'mcat-bio', description: 'MCAT amino acids, enzyme kinetics, metabolic pathways, DNA/RNA, protein synthesis, organ systems, and cell biology' },
+  { id: 'lsat-logic', label: 'LSAT Logic', category: 'lsat', subcategory: 'lsat-lr', description: 'LSAT argument structure, flaws, assumptions, strengthen/weaken, parallel reasoning, and sufficient/necessary conditions' },
+  { id: 'nclex-pharm', label: 'NCLEX Pharm', category: 'nclex', subcategory: 'nclex-pharm', description: 'NCLEX drug classifications, mechanisms of action, side effects, contraindications, and nursing implications' },
+  { id: 'bar-torts', label: 'Bar Exam Torts', category: 'bar', subcategory: 'bar-torts', description: 'Bar exam negligence elements, strict liability, intentional torts, defamation, and products liability' },
 ];

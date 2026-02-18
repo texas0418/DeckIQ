@@ -129,7 +129,7 @@ export default function HomeScreen() {
               style={styles.quickStudyChip}
               onPress={() => router.push({
                 pathname: '/(tabs)/create' as any,
-                params: { topic: topic.label, category: topic.category, subcategory: topic.subcategory },
+                params: { topic: topic.label, category: topic.category, subcategory: topic.subcategory, description: topic.description },
               })}
               testID={`quick-study-${topic.id}`}
             >

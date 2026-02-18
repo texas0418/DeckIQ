@@ -85,8 +85,8 @@ export default function CreateScreen() {
   ]);
 
   useEffect(() => {
-    if (params.topic) setTopic(params.topic);
-    if (params.description) setDescription(params.description);
+    setTopic(params.topic ?? '');
+    setDescription(params.description ?? '');
   }, [params.topic, params.description]);
 
   // ===================== SHARED =====================
