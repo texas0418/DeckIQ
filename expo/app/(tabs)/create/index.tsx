@@ -52,6 +52,7 @@ const flashcardSchema = z.object({
 type ManualCard = { id: string; front: string; back: string };
 type Mode = 'ai' | 'paste' | 'upload' | 'manual';
 
+// eslint-disable-next-line max-lines-per-function, complexity -- tracked in #1
 export default function CreateScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ topic?: string; category?: string; subcategory?: string; description?: string }>();
@@ -177,7 +178,7 @@ export default function CreateScreen() {
         setUploadDocText(null);
         setUploadDocName(null);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to pick image.');
     }
   };
@@ -196,7 +197,7 @@ export default function CreateScreen() {
         setUploadDocName(file.name);
         setUploadImage(null);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to read document. Make sure it is a text file.');
     }
   };
