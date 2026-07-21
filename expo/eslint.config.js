@@ -4,6 +4,19 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ["dist/*"],
-  }
+    ignores: ["dist/*", "node_modules/**", "ios/**", "android/**", ".expo/**"],
+  },
+  {
+    // Deterministic guards against common LLM failure modes:
+    // sprawling functions, deep nesting, and unstructured complexity.
+    rules: {
+      complexity: ['error', 15],
+      'max-depth': ['error', 5],
+      'max-lines-per-function': [
+        'error',
+        { max: 300, skipBlankLines: true, skipComments: true },
+      ],
+      'max-lines': ['error', { max: 1000, skipBlankLines: true, skipComments: true }],
+    },
+  },
 ]);

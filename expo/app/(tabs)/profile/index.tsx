@@ -6,7 +6,7 @@ import Colors from '@/constants/colors';
 import { useFlashcards } from '@/contexts/FlashcardContext';
 
 export default function ProfileScreen() {
-  const { totalDecks, totalSessions, totalCardsStudied, totalMastered, decks } = useFlashcards();
+  const { totalDecks, totalSessions, totalCardsStudied, decks } = useFlashcards();
 
   const totalCards = decks.reduce((sum, d) => sum + d.cards.length, 0);
   const totalMasteredCards = decks.reduce((sum, d) => sum + d.cards.filter((c) => c.mastered).length, 0);
