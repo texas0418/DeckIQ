@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-const AI_API_URL = process.env.EXPO_PUBLIC_AI_API_URL || 'https://api.openai.com/v1/chat/completions';
-const AI_API_KEY = process.env.EXPO_PUBLIC_AI_API_KEY || '';
-const AI_MODEL = process.env.EXPO_PUBLIC_AI_MODEL || 'gpt-4o-mini';
+import { getDeviceId } from './deviceId';
+
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 interface GenerateObjectOptions<T extends z.ZodType> {
   messages: { role: 'user' | 'system' | 'assistant'; content: string }[];
@@ -22,6 +23,43 @@ interface GenerateFromTextOptions<T extends z.ZodType> {
   schema: T;
 }
 
+async function callGenerateCards<T extends z.ZodType>(
+  payload: Record<string, unknown>,
+  schema: T
+): Promise<z.infer<T>> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error(
+      'AI backend is not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file.'
+    );
+  }
+
+  const deviceId = await getDeviceId();
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-cards`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+      'x-device-id': deviceId,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let message = `AI API error (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body?.error) message = body.error;
+    } catch {
+      // keep the generic message
+    }
+    throw new Error(message);
+  }
+
+  const parsed = await response.json();
+  return schema.parse(parsed);
+}
+
 /**
  * Generates structured AI output from text messages with Zod schema validation.
  */
@@ -29,46 +67,7 @@ export async function generateObject<T extends z.ZodType>(
   options: GenerateObjectOptions<T>
 ): Promise<z.infer<T>> {
   const { messages, schema } = options;
-
-  if (!AI_API_KEY) {
-    throw new Error('AI API key is not configured. Set EXPO_PUBLIC_AI_API_KEY in your .env file.');
-  }
-
-  const schemaDescription = zodToPromptDescription(schema);
-
-  const systemMessage = {
-    role: 'system' as const,
-    content: `You are a helpful assistant that generates structured data. Always respond with valid JSON matching this exact structure:\n${schemaDescription}\n\nRespond ONLY with the JSON object, no markdown, no code fences, no extra text.`,
-  };
-
-  const response = await fetch(AI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [systemMessage, ...messages],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`AI API error (${response.status}): ${errorBody}`);
-  }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-
-  if (!content) {
-    throw new Error('No content returned from AI API.');
-  }
-
-  const parsed = JSON.parse(content);
-  return schema.parse(parsed);
+  return callGenerateCards({ kind: 'messages', messages }, schema);
 }
 
 /**
@@ -78,60 +77,7 @@ export async function generateFromImage<T extends z.ZodType>(
   options: GenerateFromImageOptions<T>
 ): Promise<z.infer<T>> {
   const { imageBase64, mimeType, prompt, schema } = options;
-
-  if (!AI_API_KEY) {
-    throw new Error('AI API key is not configured. Set EXPO_PUBLIC_AI_API_KEY in your .env file.');
-  }
-
-  const schemaDescription = zodToPromptDescription(schema);
-
-  const systemMessage = {
-    role: 'system' as const,
-    content: `You are a helpful assistant that generates structured data. Always respond with valid JSON matching this exact structure:\n${schemaDescription}\n\nRespond ONLY with the JSON object, no markdown, no code fences, no extra text.`,
-  };
-
-  const userMessage = {
-    role: 'user' as const,
-    content: [
-      { type: 'text' as const, text: prompt },
-      {
-        type: 'image_url' as const,
-        image_url: {
-          url: `data:${mimeType};base64,${imageBase64}`,
-        },
-      },
-    ],
-  };
-
-  const response = await fetch(AI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [systemMessage, userMessage],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`AI API error (${response.status}): ${errorBody}`);
-  }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-
-  if (!content) {
-    throw new Error('No content returned from AI API.');
-  }
-
-  const parsed = JSON.parse(content);
-  return schema.parse(parsed);
+  return callGenerateCards({ kind: 'image', imageBase64, mimeType, prompt }, schema);
 }
 
 /**
@@ -141,69 +87,5 @@ export async function generateFromText<T extends z.ZodType>(
   options: GenerateFromTextOptions<T>
 ): Promise<z.infer<T>> {
   const { text, prompt, schema } = options;
-
-  if (!AI_API_KEY) {
-    throw new Error('AI API key is not configured. Set EXPO_PUBLIC_AI_API_KEY in your .env file.');
-  }
-
-  const schemaDescription = zodToPromptDescription(schema);
-
-  const systemMessage = {
-    role: 'system' as const,
-    content: `You are a helpful assistant that generates structured data. Always respond with valid JSON matching this exact structure:\n${schemaDescription}\n\nRespond ONLY with the JSON object, no markdown, no code fences, no extra text.`,
-  };
-
-  const userMessage = {
-    role: 'user' as const,
-    content: `${prompt}\n\n--- CONTENT START ---\n${text}\n--- CONTENT END ---`,
-  };
-
-  const response = await fetch(AI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [systemMessage, userMessage],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`AI API error (${response.status}): ${errorBody}`);
-  }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-
-  if (!content) {
-    throw new Error('No content returned from AI API.');
-  }
-
-  const parsed = JSON.parse(content);
-  return schema.parse(parsed);
-}
-
-function zodToPromptDescription(schema: z.ZodType): string {
-  try {
-    return JSON.stringify(
-      {
-        cards: [
-          {
-            front: 'Question or term goes here',
-            back: 'Answer or definition goes here',
-          },
-        ],
-      },
-      null,
-      2
-    );
-  } catch {
-    return '{ "cards": [{ "front": "string", "back": "string" }] }';
-  }
+  return callGenerateCards({ kind: 'text', text, prompt }, schema);
 }
