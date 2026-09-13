@@ -1,0 +1,57 @@
+DECKIQ — GOOGLE PLAY STORE LISTING (draft 2026-08-15)
+=======================================================
+
+APP NAME (30 chars max)
+DeckIQ: AI Flashcards
+
+SHORT DESCRIPTION (80 chars max)
+Any topic in, study-ready flashcards out — generated in seconds, yours to keep.
+
+FULL DESCRIPTION (4000 chars max)
+-----------------------------------------------------
+Type a topic. Get a deck. Start studying.
+
+DeckIQ turns anything you need to learn — "photosynthesis," "Spanish past tense," "aviation weather minimums," your own pasted notes — into clean, study-ready flashcards in seconds. No more spending the whole evening MAKING the cards instead of learning them.
+
+AI THAT DOES THE BUSYWORK
+• Enter any topic and DeckIQ generates a focused deck instantly
+• Cards come out clear and quizzable — terms, definitions, the questions an instructor would actually ask
+• Regenerate or trim until the deck is exactly what you need
+
+STUDY SESSIONS THAT STICK
+• Flip through decks in a clean, distraction-free study view
+• Track progress and mastery per deck — know what's solid and what needs another pass
+• Organized by category, from quick-browse collections to your own custom decks
+
+MADE FOR REAL STUDYING
+Students, professionals prepping for certifications, language learners, trivia obsessives — if you'd study it, DeckIQ will card it.
+
+Simple, fast, and focused: open the app, name the thing you need to know, and get to work.
+-----------------------------------------------------
+
+CATEGORY: Education
+WEBSITE: https://texas0418.github.io/DeckIQ/
+PRIVACY POLICY URL (verified live 2026-08-15): https://texas0418.github.io/DeckIQ/#privacy
+  (anchor on the one-page site; consider a dedicated /privacy.html before submission if Play complains)
+
+GRAPHIC ASSETS (expo/store/)
+- play-icon-512.png — DONE
+- play-feature-graphic.png (1024x500) — DONE
+- screenshots-android/ — captured this run from release APK
+
+DATA SAFETY FORM — DIFFERENT FROM THE LOCAL-ONLY FLEET, read carefully
+- AI generation sends the user's topic/prompt text to the app's Supabase edge function proxy (which calls OpenAI). Declare: "Other user-generated content" — collected, processed for app functionality; confirm whether the proxy logs/stores prompts before answering "not stored." NO react-native-purchases in this app; no accounts visible — verify before declaring zero identifiers.
+- Decks/progress stored on device
+- CHECK WITH SIMON at submission: does the Supabase project log requests? Retention?
+
+CONTENT RATING: Everyone (IARC; AI-generated content questions may appear — the app generates educational text)
+
+MONETIZATION: none visible in app (no purchases SDK). Confirm intended model before listing (free?).
+
+ANDROID QA NOTES
+- SDK 54 app (not the house 57) — expo-system-ui NOT added; expo-router handles theming
+- AI generation requires the Supabase edge function — Supabase is on a PAID plan as of 2026-08-15, no auto-pause; backend is always live
+- Emulator smoke this run: navigation/categories/local decks (AI gen may fail if backend paused — note result)
+
+RELEASE NOTES (first release)
+DeckIQ arrives on Android: type any topic, get a study-ready flashcard deck in seconds, and track your mastery as you go.
