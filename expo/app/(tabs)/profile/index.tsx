@@ -4,6 +4,7 @@ import { Brain, Target, Layers, TrendingUp, BookOpen, Award } from 'lucide-react
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useFlashcards } from '@/contexts/FlashcardContext';
+import MoreApps from '@/components/MoreApps';
 
 export default function ProfileScreen() {
   const { totalDecks, totalSessions, totalCardsStudied, decks } = useFlashcards();
@@ -70,7 +71,8 @@ export default function ProfileScreen() {
       )}
 
       <View style={styles.bottomPadding} />
-    </ScrollView>
+      <MoreApps />
+      </ScrollView>
   );
 }
 
