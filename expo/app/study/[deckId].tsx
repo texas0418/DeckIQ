@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useFlashcards } from '@/contexts/FlashcardContext';
+import { recordStudySessionCompleted } from '@/lib/review';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -119,6 +120,7 @@ export default function StudyScreen() {
       date: new Date().toISOString(),
     });
     setSessionComplete(true);
+    recordStudySessionCompleted();
   }, [deck, masteredThisSession, updateDeck, addStudyResult]);
 
   const resetSession = useCallback(() => {
