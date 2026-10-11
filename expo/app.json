@@ -2,7 +2,7 @@
   "expo": {
     "name": "DeckIQ",
     "slug": "deckiq",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "deckiq",
@@ -19,7 +19,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "DeckIQ uses your camera to scan physical flashcards, handwritten notes, and typed documents, allowing you to instantly convert them into digital study decks."
-      }
+      },
+      "buildNumber": "7"
     },
     "android": {
       "adaptiveIcon": {
