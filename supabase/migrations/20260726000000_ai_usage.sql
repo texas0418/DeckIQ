@@ -15,3 +15,10 @@ create index if not exists ai_usage_ip_created_idx
   on public.ai_usage (ip, created_at desc);
 
 alter table public.ai_usage enable row level security;
+
+-- From 2026-10-30 Supabase stops auto-granting Data API roles on new tables,
+-- so a fresh environment (supabase db reset, preview branch) would leave even
+-- the service role unable to write this ledger. Service-role-only by design;
+-- the identity column also needs its sequence.
+grant select, insert, update, delete on public.ai_usage to service_role;
+grant usage, select on sequence public.ai_usage_id_seq to service_role;
